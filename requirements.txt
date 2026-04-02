@@ -1,0 +1,11 @@
+uv
+langchain
+langchain-community
+langchain-text-splitters
+langchain-huggingface
+langchain-chroma
+langchain-pinecone
+langchain-groq
+chromadb
+python-dotenv
+pypdf
