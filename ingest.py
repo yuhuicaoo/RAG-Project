@@ -1,24 +1,28 @@
 import os
 from dotenv import load_dotenv
 
-from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
 
-from utils import get_vector_store
+from utils import get_vector_store, BytesIOPyMuPDFLoader
+import io
 
 load_dotenv()
 
-def load_document(file_path: str):
+def load_document(uploaded_file):
     """
     Currently takes in a pdf file (locally) and loads it in using PyPDF
     
     :params file_path: The path of where the document to be loaded is.
     """
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"No file found at {file_path}")
+    uploaded_file.seek(0)
+    loader = BytesIOPyMuPDFLoader(io.BytesIO(uploaded_file.read()))
+    docs = loader.load()
+
+    for doc in docs:
+        doc.metadata["source"] = uploaded_file.name
     
-    return PyPDFLoader(file_path=file_path).load()
+    return docs
 
 def split_document_into_chunks(document, chunk_size=1000, chunk_overlap=200):
     """
@@ -61,5 +65,5 @@ def store_embeddings(splits, embedding_model):
         print(f"Added {len(splits)} chunks to the vector store")
     return vector_store
 
-def ingest_document(file_path: str, embeddings):
-    return store_embeddings(split_document_into_chunks(load_document(file_path)), embedding_model=embeddings)
+def ingest_document(uploaded_file, embeddings):
+    return store_embeddings(split_document_into_chunks(load_document(uploaded_file)), embedding_model=embeddings)
