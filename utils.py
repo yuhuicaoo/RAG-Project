@@ -36,7 +36,12 @@ def get_vector_store(embedding_model):
     return PineconeVectorStore(embedding=embedding_model, index=index)
 
 class BytesIOPyMuPDFLoader(PyMuPDFLoader):
-    """Load `PDF` files using `PyMuPDF` from a BytesIO stream."""
+    """
+    Load `PDF` files using `PyMuPDF` from a BytesIO stream.
+    
+    Needed a way to parse through streamlit uploaded files into the LangChain PDF loader.
+    Solution found from --> https://github.com/langchain-ai/langchain/issues/6265#issuecomment-1929210954
+    """
 
     def __init__(
         self,
