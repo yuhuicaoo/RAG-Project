@@ -1,11 +1,11 @@
 import os
 from dotenv import load_dotenv
 
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
-from pinecone import Pinecone
+
+from utils import get_vector_store
 
 load_dotenv()
 
@@ -27,18 +27,6 @@ def split_document_into_chunks(document, chunk_size=1000, chunk_overlap=200):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size = chunk_size, chunk_overlap=chunk_overlap)
     return text_splitter.split_documents(document)
 
-def load_embeddings_model_from_HF(model_name=None):
-    """
-    Load embedding model from HuggingFace.
-
-    :param model_name: name of the embedding model to use.
-    """
-
-    if not model_name:
-        model_name = "sentence-transformers/all-MiniLM-L6-v2"
-
-    return HuggingFaceEmbeddings(model_name=model_name)
-
 def document_already_exists(vector_store: PineconeVectorStore, source: str) -> bool:
     """
     Checks if the document/source to be added is already in the vector store.
@@ -49,21 +37,18 @@ def document_already_exists(vector_store: PineconeVectorStore, source: str) -> b
     results = vector_store.similarity_search(
         query="check if document exist",
         k = 1,
-        filter= {'source': f'{source}'}
+        filter= {"source": {"$eq": source}}
     )
     return len(results) > 0
 
-def store_embeddings(splits, embeddings):
+def store_embeddings(splits, embedding_model):
     """
     Stores embedded chunks into the vector store
 
     :param splits: a list of chunks representing the document
     :param embeddings: Embedding's model
     """
-    api_key = os.getenv("PINECONE_API_KEY")
-    pc = Pinecone(api_key=api_key)
-    index = pc.Index("rag-index")
-    vector_store = PineconeVectorStore(embedding=embeddings, index=index)
+    vector_store = get_vector_store(embedding_model)
 
     source = splits[0].metadata.get("source", "")
 
@@ -75,3 +60,6 @@ def store_embeddings(splits, embeddings):
         vector_store.add_documents(documents=splits)
         print(f"Added {len(splits)} chunks to the vector store")
     return vector_store
+
+def ingest_document(file_path: str, embeddings):
+    return store_embeddings(split_document_into_chunks(load_document(file_path)), embedding_model=embeddings)
