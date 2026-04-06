@@ -14,7 +14,9 @@ As a student constantly navigating multiple dense (and often very technical) res
 
 ## 🧠 Overview
 
-This project implements an end-to-end Retrieval Augmented Generation (RAG) pipeline that enables intelligent question-answering over custom document corpora. Documents are embedded using a HuggingFace embedding model, stored and retrieved from a Pinecone vector database, and responses are generated using Llama4 Scout (via Groq). Built on the LangChain framework and a interactive UI from Streamlit.
+
+<p align="justify">
+This project implements an end-to-end Retrieval Augmented Generation (RAG) pipeline that enables intelligent question-answering over custom document corpora. Documents are embedded using a HuggingFace embedding model, stored and retrieved from a Pinecone vector database, and responses are generated using Llama4 Scout (via Groq). Built on the LangChain framework and a interactive UI from Streamlit.</p>
 
 ## 🏗️ Architecture
 Will add a diagram.
@@ -46,3 +48,4 @@ Made by **Yuhui Cao** — feel free to reach out!
 - **GitHub**: [yuhuicaoo](https://github.com/yuhuicaoo)
 - **LinkedIn**: [Yuhui Cao](https://www.linkedin.com/in/yuhuicao/)
 - **Email**: yuhuicao20@gmail.com
+
