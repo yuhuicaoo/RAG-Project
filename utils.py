@@ -15,7 +15,6 @@ from io import BytesIO
 
 load_dotenv()
 
-
 def load_embeddings_model_from_HF(model_name=None):
     """
     Load embedding model from HuggingFace.

@@ -7,6 +7,7 @@ from pathlib import Path
 from ingest import document_already_exists, ingest_document
 from query import get_agent
 from utils import load_embeddings_model_from_HF, get_vector_store
+from langsmith import traceable
 
 
 @st.cache_resource
@@ -15,7 +16,8 @@ def setup():
     vector_store = get_vector_store(embedding_model)
     agent = get_agent(vector_store)
     return embedding_model, vector_store, agent
-   
+
+@traceable
 def response_generator(agent, query):
     events = list(agent.stream(
                 {"messages": [{"role": "user", "content": query}]},
@@ -26,7 +28,8 @@ def response_generator(agent, query):
     for word in response.split():
         yield word + " "
         time.sleep(0.05)
-
+    
+    
 st.title("LLM + RAG Assistant")
 
 with st.spinner("Loading model and documents..."):
