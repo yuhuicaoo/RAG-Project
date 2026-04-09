@@ -28,11 +28,11 @@ def load_embeddings_model_from_HF(model_name=None):
     return HuggingFaceEmbeddings(model_name=model_name)
 
 
-def get_vector_store(embedding_model):
+def get_vector_store(embedding_model, namespace:str):
     api_key = os.getenv("PINECONE_API_KEY")
     pc = Pinecone(api_key=api_key)
-    index = pc.Index("rag-index")
-    return PineconeVectorStore(embedding=embedding_model, index=index)
+    index = pc.Index(os.getenv("PINECONE_INDEX_NAME"))
+    return PineconeVectorStore(embedding=embedding_model, index=index, namespace=namespace)
 
 class BytesIOPyMuPDFLoader(PyMuPDFLoader):
     """

@@ -3,6 +3,7 @@ load_dotenv()
 
 import streamlit as st
 import time
+from uuid import uuid4
 from pathlib import Path
 from ingest import document_already_exists, ingest_document
 from query import get_agent
@@ -11,11 +12,23 @@ from langsmith import traceable
 
 
 @st.cache_resource
+def load_embedding_model():
+    return load_embeddings_model_from_HF()
+
+
 def setup():
-    embedding_model = load_embeddings_model_from_HF()
-    vector_store = get_vector_store(embedding_model)
-    agent = get_agent(vector_store)
-    return embedding_model, vector_store, agent
+    if "namespace" not in st.session_state:
+        st.session_state.namespace = str(uuid4())
+
+    embedding_model = load_embedding_model() 
+
+    if "vector_store" not in st.session_state:
+        st.session_state.vector_store = get_vector_store(embedding_model, namespace=st.session_state.namespace)
+    
+    if "agent" not in st.session_state:
+        st.session_state.agent = get_agent(st.session_state.vector_store)
+
+    return embedding_model, st.session_state.vector_store, st.session_state.agent
 
 @traceable
 def response_generator(agent, query):
@@ -45,7 +58,10 @@ for message in st.session_state.messages:
 with st.sidebar:
     # file uploader
     uploaded_files = st.file_uploader(
-        "Upload files", accept_multiple_files=True, type="pdf"
+        "Upload files", 
+        accept_multiple_files=True, 
+        type="pdf",
+        key=f"uploader_{st.session_state.get('upload_key', 0)}"
     )
 
     if uploaded_files:
@@ -56,18 +72,18 @@ with st.sidebar:
         
         # upload the new documents to the vector store
         for uploaded_file in new_docs:
-            ingest_document(uploaded_file, embedding_model)
+            ingest_document(uploaded_file, embedding_model, namespace=st.session_state.namespace)
 
 
     st.markdown("""
         <style>
-        [data-testid="stMarkdownContainer"] p { font-size: 20px; }
+        [data-testid="stMarkdownContainer"] p { font-size: 16px; }
         </style>""", 
         unsafe_allow_html=True
     )
 
     # display the uploaded documents on the sidebar
-    for file in uploaded_files:
+    for file in (uploaded_files or []):
         st.markdown(f":material/picture_as_pdf: {Path(file.name).stem}")
         time.sleep(0.05)
         
@@ -84,3 +100,13 @@ if query := st.chat_input("Hello, how can I help?"):
             response = st.write_stream(response_generator(agent, query))
 
     st.session_state.messages.append({"role": "assistant", "content": response})
+
+if st.sidebar.button("🗑️ Clear session"):
+    vector_store.delete(delete_all=True, namespace=st.session_state.namespace)
+
+    upload_key = st.session_state.get("upload_key", 0) + 1
+
+    st.session_state.clear()
+    st.session_state.upload_key = upload_key
+
+    st.rerun()

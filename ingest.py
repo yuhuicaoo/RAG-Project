@@ -45,14 +45,14 @@ def document_already_exists(vector_store: PineconeVectorStore, source: str) -> b
     )
     return len(results) > 0
 
-def store_embeddings(splits, embedding_model):
+def store_embeddings(splits, embedding_model, namespace:str):
     """
     Stores embedded chunks into the vector store
 
     :param splits: a list of chunks representing the document
     :param embeddings: Embedding's model
     """
-    vector_store = get_vector_store(embedding_model)
+    vector_store = get_vector_store(embedding_model, namespace=namespace)
 
     source = splits[0].metadata.get("source", "")
 
@@ -65,5 +65,5 @@ def store_embeddings(splits, embedding_model):
         print(f"Added {len(splits)} chunks to the vector store")
     return vector_store
 
-def ingest_document(uploaded_file, embeddings):
-    return store_embeddings(split_document_into_chunks(load_document(uploaded_file)), embedding_model=embeddings)
+def ingest_document(uploaded_file, embeddings, namespace: str):
+    return store_embeddings(split_document_into_chunks(load_document(uploaded_file)), embedding_model=embeddings, namespace=namespace)
