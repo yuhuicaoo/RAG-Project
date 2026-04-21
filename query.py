@@ -1,7 +1,4 @@
-from dotenv import load_dotenv
-
-load_dotenv()
-
+import streamlit as st
 from langchain_groq import ChatGroq
 from langchain.agents import create_agent
 from langchain.agents.middleware import dynamic_prompt,  ModelRequest
@@ -38,7 +35,7 @@ def get_agent(vector_store: PineconeVectorStore):
         return system_message
 
     return create_agent(
-        model=ChatGroq(model="meta-llama/llama-4-scout-17b-16e-instruct"),
+        model=ChatGroq(model="meta-llama/llama-4-scout-17b-16e-instruct", api_key=st.secrets["groq"]["GROQ_API_KEY"]),
         tools=[],
         middleware=[prompt_with_context]
     )
