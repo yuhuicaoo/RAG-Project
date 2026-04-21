@@ -8,7 +8,10 @@ from utils import load_embeddings_model_from_HF, get_vector_store
 from langsmith import traceable
 import re
 
-
+st.secrets["langsmith"]["LANGSMITH_API_KEY"]
+st.secrets["langsmith"]["LANGSMITH_TRACING"]
+st.secrets["langsmith"]["LANGSMITH_ENDPOINT"]
+st.secrets["langsmith"]["LANGSMITH_PROJECT"]
 
 @st.cache_resource
 def load_embedding_model():
