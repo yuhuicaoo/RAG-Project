@@ -31,17 +31,14 @@ def setup():
 
 @traceable
 def response_generator(agent, query):
-    events = list(agent.stream(
-                {"messages": [{"role": "user", "content": query}]},
-                stream_mode="values"
-            ))
-    
-    response = events[-1]["messages"][-1].content
-
-    for chunk in re.split(r'(\s+)', response):
-        yield chunk
-        time.sleep(0.02)
-    
+    for event in agent.astream_events(
+        {"messages": [{"role": "user", "content": query}]},
+        version="v2"
+    ):
+        if event["event"] == "on_chat_model_stream":
+            chunk = event["data"]["chunk"].content
+            if chunk:
+                yield chunk
     
 st.title("LLM + RAG Assistant")
 
