@@ -104,7 +104,8 @@ if query := st.chat_input("Hello, how can I help?"):
     st.session_state.messages.append({"role": "assistant", "content": response})
 
 if st.sidebar.button("🗑️ Clear session"):
-    vector_store.delete(delete_all=True, namespace=st.session_state.namespace)
+    if len(uploaded_file) > 0:
+        vector_store.delete(delete_all=True, namespace=st.session_state.namespace)
 
     upload_key = st.session_state.get("upload_key", 0) + 1
 
