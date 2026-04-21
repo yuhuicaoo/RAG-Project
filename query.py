@@ -4,7 +4,8 @@ from langchain.agents import create_agent
 from langchain.agents.middleware import dynamic_prompt,  ModelRequest
 from langchain_pinecone import PineconeVectorStore
 from langsmith import traceable
-
+from config import load_secrets
+load_secrets()
 
 def get_agent(vector_store: PineconeVectorStore):
 
