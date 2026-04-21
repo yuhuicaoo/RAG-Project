@@ -32,25 +32,15 @@ def setup():
 
 @traceable
 def response_generator(agent, query):
-    async def _stream():
-        async for event in agent.stream(
-            {"messages": [{"role": "user", "content": query}]},
-            stream_mode="values"
-        ):
-            last_message = event["messages"][-1]
-            if last_message.type == "ai":
-                for chunk in re.split(r'(\s+)', last_message.content):
-                    if chunk:
-                        yield chunk
-
-    async def _collect():
-        chunks = []
-        async for chunk in _stream():
-            chunks.append(chunk)
-        return chunks
-
-    chunks = asyncio.run(_collect())
-    yield from chunks
+    for event in agent.stream(
+        {"messages": [{"role": "user", "content": query}]},
+        stream_mode="values"
+    ):
+        last_message = event["messages"][-1]
+        if last_message.type == "ai":
+            for chunk in re.split(r'(\s+)', last_message.content):
+                if chunk:
+                    yield chunk
     
     
 st.title("LLM + RAG Assistant")
