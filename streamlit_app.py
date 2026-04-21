@@ -9,6 +9,7 @@ from ingest import document_already_exists, ingest_document
 from query import get_agent
 from utils import load_embeddings_model_from_HF, get_vector_store
 from langsmith import traceable
+import re
 
 
 @st.cache_resource
@@ -38,9 +39,10 @@ def response_generator(agent, query):
             ))
     
     response = events[-1]["messages"][-1].content
-    for word in response.split():
-        yield word + " "
-        time.sleep(0.05)
+
+    for chunk in re.split(r'(\s+)', response):
+        yield chunk
+        time.sleep(0.02)
     
     
 st.title("LLM + RAG Assistant")
