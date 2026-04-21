@@ -42,6 +42,8 @@ def response_generator(agent, query):
                 for chunk in re.split(r'(\s+)', last_message.content):
                     if chunk:
                         yield chunk
+
+    async def _collect():
         chunks = []
         async for chunk in _stream():
             chunks.append(chunk)
