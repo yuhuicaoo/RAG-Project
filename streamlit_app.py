@@ -1,3 +1,5 @@
+from config import load_secrets
+load_secrets()
 import streamlit as st
 import time
 from uuid import uuid4
@@ -7,8 +9,7 @@ from query import get_agent
 from utils import load_embeddings_model_from_HF, get_vector_store
 from langsmith import traceable
 import re
-from config import load_secrets
-load_secrets()
+import asyncio
 
 @st.cache_resource
 def load_embedding_model():
@@ -31,14 +32,24 @@ def setup():
 
 @traceable
 def response_generator(agent, query):
-    for event in agent.astream_events(
-        {"messages": [{"role": "user", "content": query}]},
-        version="v2"
-    ):
-        if event["event"] == "on_chat_model_stream":
-            chunk = event["data"]["chunk"].content
-            if chunk:
-                yield chunk
+    async def _stream():
+        async for event in agent.stream(
+            {"messages": [{"role": "user", "content": query}]},
+            stream_mode="values"
+        ):
+            last_message = event["messages"][-1]
+            if last_message.type == "ai":
+                for chunk in re.split(r'(\s+)', last_message.content):
+                    if chunk:
+                        yield chunk
+        chunks = []
+        async for chunk in _stream():
+            chunks.append(chunk)
+        return chunks
+
+    chunks = asyncio.run(_collect())
+    yield from chunks
+    
     
 st.title("LLM + RAG Assistant")
 
