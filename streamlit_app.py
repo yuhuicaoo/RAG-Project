@@ -41,6 +41,8 @@ def response_generator(agent, query):
             for chunk in re.split(r'(\s+)', last_message.content):
                 if chunk:
                     yield chunk
+                    time.sleep(0.02)
+
     
     
 st.title("LLM + RAG Assistant")
