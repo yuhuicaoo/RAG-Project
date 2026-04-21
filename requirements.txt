@@ -10,3 +10,4 @@ python-dotenv
 pypdf
 torch>=2.8.0 
 torchvision>=0.23.0
+sentence-transformers
