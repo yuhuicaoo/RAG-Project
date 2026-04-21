@@ -12,6 +12,7 @@ from langchain_community.document_loaders.parsers.pdf import (
 )
 from langchain_core.documents import Document
 from io import BytesIO
+import streamlit as st
 
 load_dotenv()
 
@@ -29,9 +30,9 @@ def load_embeddings_model_from_HF(model_name=None):
 
 
 def get_vector_store(embedding_model, namespace:str):
-    api_key = os.getenv("PINECONE_API_KEY")
+    api_key = st.secrets["pinecone"]["PINECONE_API_KEY"]
     pc = Pinecone(api_key=api_key)
-    index = pc.Index(os.getenv("PINECONE_INDEX_NAME"))
+    index = pc.Index(st.secrets["pinecone"]["PINECONE_INDEX_NAME"])
     return PineconeVectorStore(embedding=embedding_model, index=index, namespace=namespace)
 
 class BytesIOPyMuPDFLoader(PyMuPDFLoader):

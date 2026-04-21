@@ -1,6 +1,3 @@
-from dotenv import load_dotenv
-load_dotenv()
-
 import streamlit as st
 import time
 from uuid import uuid4
@@ -10,6 +7,7 @@ from query import get_agent
 from utils import load_embeddings_model_from_HF, get_vector_store
 from langsmith import traceable
 import re
+
 
 
 @st.cache_resource
